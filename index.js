@@ -6,7 +6,6 @@ const {
 } = JSON.parse(file);
 
 function treeTraverse(tree, parentHeadingLevel = 0, text = "") {
-  console.log(tree.type);
   switch (tree.type) {
     // base cases
     case "text":
@@ -17,11 +16,17 @@ function treeTraverse(tree, parentHeadingLevel = 0, text = "") {
       break;
 
     // recursive cases
+    case "section":
+      if (tree.children[0].type === "heading") {
+        parentHeadingLevel++;
+      }
+      text += `${tree.children
+        .map((subtree) => treeTraverse(subtree, parentHeadingLevel))
+        .join(" ")}\n\n`;
+      break;
     case "heading":
-      console.log("heading");
-      const currentHeadingLevel = parentHeadingLevel + 1;
-      text += `${"#".repeat(currentHeadingLevel)} ${tree.children
-        .map((child) => treeTraverse(child, currentHeadingLevel, text))
+      text += `${"#".repeat(parentHeadingLevel)} ${tree.children
+        .map((child) => treeTraverse(child, parentHeadingLevel, text))
         .join(" ")}\n\n`;
       break;
     case "paragraph":
@@ -40,4 +45,8 @@ function treeTraverse(tree, parentHeadingLevel = 0, text = "") {
   return text;
 }
 
-console.log(treeTraverse(tree));
+const pathOut = "./sample-page.md";
+const mdOut = treeTraverse(tree);
+fs.writeFileSync(pathOut, mdOut);
+console.log("wrote content to:", pathOut);
+console.log("CONTENT:\n\n", mdOut);
