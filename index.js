@@ -24,24 +24,36 @@ function treeTraverse(tree, parentHeadingLevel = 0, text = "") {
       }
       text += `${tree.children
         .map((subtree) => treeTraverse(subtree, parentHeadingLevel))
-        .join(" ")}\n\n`;
+        .join("")}\n\n`;
       break;
     case "heading":
       text += `${"#".repeat(parentHeadingLevel)} ${tree.children
         .map((child) => treeTraverse(child, parentHeadingLevel, text))
-        .join(" ")}\n\n`;
+        .join("")}\n\n`;
       break;
     case "paragraph":
       text += `${tree.children
         .map((child) => treeTraverse(child, parentHeadingLevel))
-        .join(" ")}\n\n`;
+        .join("")}\n\n`;
       break;
+    case "list":
+      text += tree.children
+        .map((listItem) => treeTraverse(listItem, parentHeadingLevel))
+        .join("\n");
+      break;
+    case "listItem":
+      text += `- ${tree.children
+        .map((child) => treeTraverse(child, parentHeadingLevel))
+        .join("")}`;
+      break;
+    // TODO: figure out ordered lists
+    // TODO: figure out tables
 
     // recursive inline cases
     case "literal":
       text += `\`${tree.children
         .map((child) => treeTraverse(child, parentHeadingLevel))
-        .join(" ")}\``;
+        .join("")}\``;
       break;
     case "ref_role":
       let url = "#"; // default if ref_role is something unexpected
@@ -54,15 +66,25 @@ function treeTraverse(tree, parentHeadingLevel = 0, text = "") {
 
       text += `[${tree.children
         .map((child) => treeTraverse(child, parentHeadingLevel))
-        .join(" ")}](${url})`;
+        .join("")}](${url})`;
       break;
 
-    // TODO: bold and italic cases
+    case "emphasis":
+      text += `*${tree.children
+        .map((child) => treeTraverse(child, parentHeadingLevel))
+        .join("")}*`;
+      break;
+
+    case "strong":
+      text += `**${tree.children
+        .map((child) => treeTraverse(child, parentHeadingLevel))
+        .join("")}**`;
+      break;
 
     default:
       text += tree.children
         .map((subtree) => treeTraverse(subtree, parentHeadingLevel))
-        .join(" ");
+        .join("");
       break;
   }
 
